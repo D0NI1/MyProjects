@@ -1,49 +1,244 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Donart Llalloshi's Bio</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memorization Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 1em 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #4CAF50;
+        }
+
+        .form-group {
+            margin: 15px 0;
+        }
+
+        label {
+            font-size: 1.2em;
+            color: #555;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .result {
+            margin-top: 30px;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .result ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .result li {
+            padding: 5px 0;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
 </head>
 <body>
-  <header>
-      <img src="" alt="Donart Llalloshi" class="">
-      <h1>Donart Llalloshi</h1>
-      <p>Web Developer, Programmer, and Tech Student</p>
-      <p>Follow me on social media:</p>
-      <p>
-          <a href="https://instagram.com/llalloshid"
-          target="_blank">Instagram</a> |
-          <a href="https://tiktok.com/donarti1"
-          target="_blank">Tik Tok</a>
-      </p>
-  </header>
-  <main>
-      <section class="bio">
-          <h2>About Me</h2>
-          <p>Hello! I'm Donart Llalloshi, a web developer with a passion
-              for front-end design and user experience.
-              I've been building websites for over 5 years
-                and love what I do.</p>
-          <!-- Add more paragraphs as needed -->
-      </section>
-              
-            <section class="projects">
-                <h2>Projects:</h2>
-                <ul>
-                    <li><a href="file:///C:/Users/SonY/Desktop/Donarti's%20work/Calculator/index.html">Project One</a></li>
-                    <li><a href="file:///C:/Users/SonY/Desktop/Donarti's%20work/Game%201.html">Project Two</a></li>
-                    <li><a href="file:///C:/Users/SonY/Desktop/Donarti's%20work/index.html#Modelet">Project Three</a></li>
-                    <!-- Add more list items as needed -->
-                </ul>
-            </section>
-              <!-- Add more list items as needed -->
-          </ul>
-      </section>
-  </main>
-  <footer>
-      <p>Contact me at <a href="mailto:donartllalloshi69@gmail.com">donartllalloshi69@gmail.com</a></p>
-  </footer>
+
+    <header>
+        <h1>Memorization Calculator</h1>
+    </header>
+
+    <div class="container">
+        <h2>Enter Your Information</h2>
+        <div class="form-group">
+            <label for="targetAyahs">Target Number of Ayahs</label>
+            <input type="number" id="targetAyahs" placeholder="Enter number of ayahs you want to memorize" />
+        </div>
+
+        <div class="form-group">
+            <label for="knownSurahs">Known Surahs</label>
+            <select id="knownSurahs" multiple>
+                <!-- Surahs will be dynamically added here -->
+            </select>
+        </div>
+
+        <button onclick="calculate()">Calculate</button>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        // Surah database with their corresponding ayah counts
+        const surahs = [
+            { surah: "Al-Fatiha", ayahs: 7 },
+            { surah: "Al-Baqarah", ayahs: 286 },
+            { surah: "Aal-E-Imran", ayahs: 200 },
+            { surah: "An-Nisa", ayahs: 176 },
+            { surah: "Al-Ma'idah", ayahs: 120 },
+            { surah: "Al-An'am", ayahs: 165 },
+            { surah: "Al-A'raf", ayahs: 206 },
+            { surah: "Al-Anfal", ayahs: 75 },
+            { surah: "At-Tawbah", ayahs: 129 },
+            { surah: "Yunus", ayahs: 109 },
+            { surah: "Hud", ayahs: 123 },
+            { surah: "Yusuf", ayahs: 111 },
+            { surah: "Ibrahim", ayahs: 52 },
+            { surah: "Al-Hijr", ayahs: 99 },
+            { surah: "An-Nahl", ayahs: 128 },
+            { surah: "Al-Isra", ayahs: 111 },
+            { surah: "Al-Kahf", ayahs: 110 },
+            { surah: "Maryam", ayahs: 98 },
+            { surah: "Ta-Ha", ayahs: 135 },
+            { surah: "Al-Anbiya", ayahs: 112 },
+            { surah: "Al-Hajj", ayahs: 78 },
+            { surah: "Al-Mu'minun", ayahs: 118 },
+            { surah: "An-Nur", ayahs: 64 },
+            { surah: "Al-Furqan", ayahs: 77 },
+            { surah: "Ash-Shu'ara", ayahs: 227 },
+            { surah: "An-Naml", ayahs: 55 },
+            { surah: "Al-Ankabut", ayahs: 69 },
+            { surah: "Ar-Rum", ayahs: 60 },
+            { surah: "Luqman", ayahs: 34 },
+            { surah: "As-Sajda", ayahs: 30 },
+            { surah: "Al-Ahzab", ayahs: 73 },
+            { surah: "Ya-Sin", ayahs: 83 },
+            { surah: "Az-Zumar", ayahs: 75 },
+            { surah: "Fussilat", ayahs: 54 },
+            { surah: "Al-Jathiya", ayahs: 37 },
+            { surah: "Al-Ahqaf", ayahs: 35 },
+            { surah: "Muhammad", ayahs: 38 },
+            { surah: "Al-Fath", ayahs: 29 },
+            { surah: "Al-Hujurat", ayahs: 18 },
+            { surah: "Qaf", ayahs: 45 },
+            { surah: "Az-Zariyat", ayahs: 60 },
+            { surah: "Al-Hadid", ayahs: 29 },
+            { surah: "Al-Mujadila", ayahs: 11 },
+            { surah: "Al-Hashr", ayahs: 24 },
+            { surah: "Al-Mumtahina", ayahs: 13 },
+            { surah: "As-Saff", ayahs: 14 },
+            { surah: "Al-Jumu'ah", ayahs: 11 },
+            { surah: "Al-Munafiqun", ayahs: 11 },
+            { surah: "At-Taghabun", ayahs: 18 },
+            { surah: "At-Talaq", ayahs: 12 },
+            { surah: "At-Tahrim", ayahs: 12 },
+            { surah: "Al-Mulk", ayahs: 30 },
+            { surah: "Al-Qalam", ayahs: 52 },
+            { surah: "Al-Haqqah", ayahs: 52 },
+            { surah: "Al-Maarij", ayahs: 44 },
+            { surah: "Nuh", ayahs: 28 },
+            { surah: "Al-Jinn", ayahs: 28 },
+            { surah: "Al-Muzzammil", ayahs: 20 },
+            { surah: "Al-Muddathir", ayahs: 56 },
+            { surah: "Al-Qiyama", ayahs: 40 },
+            { surah: "Al-Insan", ayahs: 31 },
+            { surah: "Al-Mursalat", ayahs: 50 },
+            { surah: "An-Naba", ayahs: 40 },
+            { surah: "An-Nazi'at", ayahs: 46 },
+            { surah: "Abasa", ayahs: 42 },
+            { surah: "At-Takwir", ayahs: 29 },
+            { surah: "Al-Infitar", ayahs: 19 },
+            { surah: "Al-Mutaffifin", ayahs: 36 },
+            { surah: "Al-Inshiqaq", ayahs: 25 },
+            { surah: "Al-Buruj", ayahs: 22 },
+            { surah: "At-Tariq", ayahs: 17 },
+            { surah: "Al-Alaq", ayahs: 19 },
+            { surah: "Al-Qadr", ayahs: 5 },
+            { surah: "Al-Bayyina", ayahs: 8 },
+            { surah: "Az-Zalzalah", ayahs: 8 },
+            { surah: "Al-Adiyat", ayahs: 11 },
+            { surah: "Al-Qari'ah", ayahs: 11 },
+            { surah: "At-Takathur", ayahs: 8 },
+            { surah: "Al-Asr", ayahs: 3 },
+            { surah: "Al-Humazah", ayahs: 9 },
+            { surah: "Al-Fil", ayahs: 5 },
+            { surah: "Quraish", ayahs: 4 },
+            { surah: "Al-Ma'un", ayahs: 7 },
+            { surah: "Al-Kawthar", ayahs: 3 },
+            { surah: "Al-Kafirun", ayahs: 6 },
+            { surah: "An-Nasr", ayahs: 3 },
+            { surah: "Al-Masad", ayahs: 5 },
+            { surah: "Al-Ikhlas", ayahs: 4 },
+            { surah: "Al-Falaq", ayahs: 5 },
+            { surah: "An-Nas", ayahs: 6 }
+        ];
+
+        // Add surahs to the dropdown
+        const knownSurahsSelect = document.getElementById("knownSurahs");
+        surahs.forEach(surah => {
+            const option = document.createElement("option");
+            option.value = surah.surah;
+            option.textContent = surah.surah;
+            knownSurahsSelect.appendChild(option);
+        });
+
+        function calculate() {
+            const targetAyahs = parseInt(document.getElementById("targetAyahs").value);
+            const knownSurahs = Array.from(knownSurahsSelect.selectedOptions).map(option => option.value);
+
+            let totalKnownAyahs = 0;
+            knownSurahs.forEach(surah => {
+                const foundSurah = surahs.find(s => s.surah === surah);
+                totalKnownAyahs += foundSurah.ayahs;
+            });
+
+            let remainingAyahs = targetAyahs - totalKnownAyahs;
+            let resultHtml = `<h3>Result</h3><p>You need to memorize ${remainingAyahs} more ayahs.</p>`;
+
+            if (remainingAyahs > 0) {
+                resultHtml += "<ul>";
+                surahs.forEach(surah => {
+                    if (!knownSurahs.includes(surah.surah)) {
+                        let reciteCount = Math.ceil(remainingAyahs / surahs.length);
+                        resultHtml += `<li>${surah.surah}: ${reciteCount} times</li>`;
+                    }
+                });
+                resultHtml += "</ul>";
+            } else {
+                resultHtml += "<p>You have already memorized enough ayahs!</p>";
+            }
+
+            document.getElementById("result").innerHTML = resultHtml;
+        }
+    </script>
 </body>
 </html>
