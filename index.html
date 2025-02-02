@@ -3,288 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memorization Calculator</title>
+    <title>Namazi - Islamic Web App</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            background-color: #f4f4f4;
             color: #333;
             margin: 0;
             padding: 0;
-        }
-
-        header {
-            background-color: #4CAF50;
-            color: white;
             text-align: center;
-            padding: 1em 0;
         }
-
+        header {
+            background-color: #008080;
+            color: white;
+            padding: 20px;
+            font-size: 24px;
+        }
         .container {
-            max-width: 800px;
-            margin: 20px auto;
+            margin: 20px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            margin: 10px 0;
+            width: 60%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #008080;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #006666;
+        }
+        #prayerTimes, #qiblaDirection, #duaAzkar, #calendar, #hijriConverter {
+            margin-top: 20px;
             padding: 20px;
             background-color: white;
-            border-radius: 8px;
+            border-radius: 5px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-
-        h2 {
-            text-align: center;
-            color: #4CAF50;
-        }
-
-        .form-group {
-            margin: 15px 0;
-        }
-
-        label {
-            font-size: 1.2em;
-            color: #555;
-        }
-
-        input, select, button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 1em;
-        }
-
-        button {
-            background-color: #4CAF50;
-            color: white;
-            cursor: pointer;
-            border: none;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        .result {
-            margin-top: 30px;
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .result ul {
+        #prayerTimes ul {
             list-style: none;
             padding: 0;
         }
-
-        .result li {
-            padding: 5px 0;
-            border-bottom: 1px solid #ddd;
+        #prayerTimes ul li {
+            padding: 5px;
+        }
+        .result {
+            font-size: 18px;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Memorization Calculator</h1>
-    </header>
+<header>
+    Namazi - Islamic Web App
+</header>
 
-    <div class="container" id="step1">
-        <h2>Step 1: Select Surahs You Know</h2>
-        <div class="form-group">
-            <label for="surahSearch">Search and Select Surahs</label>
-            <input type="text" id="surahSearch" placeholder="Search Surahs..." oninput="filterSurahs()" />
-        </div>
-
-        <div class="form-group">
-            <label for="knownSurahs">Select Surahs</label>
-            <select id="knownSurahs" multiple style="height: 200px; width: 100%;"></select>
-        </div>
-
-        <button onclick="nextStep()">Confirm Surahs</button>
+<div class="container">
+    <!-- Prayer Times Section -->
+    <div id="prayerTimes">
+        <h2>Prayer Times</h2>
+        <input type="text" id="location" placeholder="Enter city or coordinates (e.g., Cairo)">
+        <button onclick="getPrayerTimes()">Get Prayer Times</button>
+        <ul id="timesList"></ul>
     </div>
 
-    <div class="container" id="step2" style="display: none;">
-        <h2>Step 2: Enter Target Number of Ayahs</h2>
-        <div class="form-group">
-            <label for="targetAyahs">Target Number of Ayahs</label>
-            <input type="number" id="targetAyahs" placeholder="Enter target ayahs" />
-        </div>
-
-        <button onclick="calculateRecitations()">Calculate Recitations</button>
-        <div class="result" id="result"></div>
+    <!-- Qibla Direction Section -->
+    <div id="qiblaDirection">
+        <h2>Qibla Direction</h2>
+        <button onclick="showQiblaDirection()">Find Qibla</button>
+        <div id="qiblaResult"></div>
     </div>
 
-    <script>
-        // Surah database with their corresponding ayah counts
-        const surahs = [
-            { surah: "Al-Fatiha", ayahs: 7 },
-            { surah: "Al-Baqarah", ayahs: 286 },
-            { surah: "Aal-E-Imran", ayahs: 200 },
-            { surah: "An-Nisa", ayahs: 176 },
-            { surah: "Al-Ma'idah", ayahs: 120 },
-            { surah: "Al-An'am", ayahs: 165 },
-            { surah: "Al-A'raf", ayahs: 206 },
-            { surah: "Al-Anfal", ayahs: 75 },
-            { surah: "At-Tawbah", ayahs: 129 },
-            { surah: "Yunus", ayahs: 109 },
-            { surah: "Hud", ayahs: 123 },
-            { surah: "Yusuf", ayahs: 111 },
-            { surah: "Ibrahim", ayahs: 52 },
-            { surah: "Al-Hijr", ayahs: 99 },
-            { surah: "An-Nahl", ayahs: 128 },
-            { surah: "Al-Isra", ayahs: 111 },
-            { surah: "Al-Kahf", ayahs: 110 },
-            { surah: "Maryam", ayahs: 98 },
-            { surah: "Ta-Ha", ayahs: 135 },
-            { surah: "Al-Anbiya", ayahs: 112 },
-            { surah: "Al-Hajj", ayahs: 78 },
-            { surah: "Al-Mu'minun", ayahs: 118 },
-            { surah: "An-Nur", ayahs: 64 },
-            { surah: "Al-Furqan", ayahs: 77 },
-            { surah: "Ash-Shu'ara", ayahs: 227 },
-            { surah: "An-Naml", ayahs: 55 },
-            { surah: "Al-Ankabut", ayahs: 69 },
-            { surah: "Ar-Rum", ayahs: 60 },
-            { surah: "Luqman", ayahs: 34 },
-            { surah: "As-Sajda", ayahs: 30 },
-            { surah: "Al-Ahzab", ayahs: 73 },
-            { surah: "Ya-Sin", ayahs: 83 },
-            { surah: "Az-Zumar", ayahs: 75 },
-            { surah: "Fussilat", ayahs: 54 },
-            { surah: "Al-Jathiya", ayahs: 37 },
-            { surah: "Al-Ahqaf", ayahs: 35 },
-            { surah: "Muhammad", ayahs: 38 },
-            { surah: "Al-Fath", ayahs: 29 },
-            { surah: "Al-Hujurat", ayahs: 18 },
-            { surah: "Qaf", ayahs: 45 },
-            { surah: "Az-Zariyat", ayahs: 60 },
-            { surah: "Al-Hadid", ayahs: 29 },
-            { surah: "Al-Mujadila", ayahs: 11 },
-            { surah: "Al-Hashr", ayahs: 24 },
-            { surah: "Al-Mumtahina", ayahs: 13 },
-            { surah: "As-Saff", ayahs: 14 },
-            { surah: "Al-Jumu'ah", ayahs: 11 },
-            { surah: "Al-Munafiqun", ayahs: 11 },
-            { surah: "At-Taghabun", ayahs: 18 },
-            { surah: "At-Talaq", ayahs: 12 },
-            { surah: "At-Tahrim", ayahs: 12 },
-            { surah: "Al-Mulk", ayahs: 30 },
-            { surah: "Al-Qalam", ayahs: 52 },
-            { surah: "Al-Haqqah", ayahs: 52 },
-            { surah: "Al-Maarij", ayahs: 44 },
-            { surah: "Nuh", ayahs: 28 },
-            { surah: "Al-Jinn", ayahs: 28 },
-            { surah: "Al-Muzzammil", ayahs: 20 },
-            { surah: "Al-Muddathir", ayahs: 56 },
-            { surah: "Al-Qiyama", ayahs: 40 },
-            { surah: "Al-Insan", ayahs: 31 },
-            { surah: "Al-Mursalat", ayahs: 50 },
-            { surah: "An-Naba", ayahs: 40 },
-            { surah: "An-Nazi'at", ayahs: 46 },
-            { surah: "Abasa", ayahs: 42 },
-            { surah: "At-Takwir", ayahs: 29 },
-            { surah: "Al-Infitar", ayahs: 19 },
-            { surah: "Al-Mutaffifin", ayahs: 36 },
-            { surah: "Al-Inshiqaq", ayahs: 25 },
-            { surah: "Al-Buruj", ayahs: 22 },
-            { surah: "At-Tariq", ayahs: 17 },
-            { surah: "Al-A'la", ayahs: 19 },
-            { surah: "Al-Ghashiyah", ayahs: 26 },
-            { surah: "Al-Fajr", ayahs: 30 },
-            { surah: "Al-Balad", ayahs: 20 },
-            { surah: "Ash-Shams", ayahs: 15 },
-            { surah: "Al-Lail", ayahs: 21 },
-            { surah: "Ad-Duha", ayahs: 11 },
-            { surah: "Al-Sharh", ayahs: 8 },
-            { surah: "At-Tin", ayahs: 8 },
-            { surah: "Al-Alaq", ayahs: 19 },
-            { surah: "Al-Qadr", ayahs: 5 },
-            { surah: "Al-Bayyina", ayahs: 8 },
-            { surah: "Az-Zalzalah", ayahs: 8 },
-            { surah: "Al-Adiyat", ayahs: 11 },
-            { surah: "Al-Qari'ah", ayahs: 11 },
-            { surah: "At-Takathur", ayahs: 8 },
-            { surah: "Al-Asr", ayahs: 3 },
-            { surah: "Al-Humazah", ayahs: 9 },
-            { surah: "Al-Fil", ayahs: 5 },
-            { surah: "Quraish", ayahs: 4 },
-            { surah: "Al-Ma'un", ayahs: 7 },
-            { surah: "Al-Kawthar", ayahs: 3 },
-            { surah: "Al-Kafirun", ayahs: 6 },
-            { surah: "An-Nasr", ayahs: 3 },
-            { surah: "Al-Masad", ayahs: 5 },
-            { surah: "Al-Ikhlas", ayahs: 4 },
-            { surah: "Al-Falaq", ayahs: 5 },
-            { surah: "An-Nas", ayahs: 6 }
-        ];
+    <!-- Dua and Azkar Section -->
+    <div id="duaAzkar">
+        <h2>Dua and Azkar</h2>
+        <button onclick="showDuaAzkar()">Show Daily Dua & Azkar</button>
+        <div id="duaResult"></div>
+    </div>
 
-        let selectedSurahs = [];
+    <!-- Islamic Calendar Section -->
+    <div id="calendar">
+        <h2>Islamic Calendar</h2>
+        <p id="islamicDate"></p>
+    </div>
 
-        // Filter Surahs for the search bar
-        function filterSurahs() {
-            let searchTerm = document.getElementById("surahSearch").value.toLowerCase();
-            let filteredSurahs = surahs.filter(surah => surah.surah.toLowerCase().includes(searchTerm));
+    <!-- Hijri to Gregorian Converter Section -->
+    <div id="hijriConverter">
+        <h2>Hijri to Gregorian Converter</h2>
+        <input type="text" id="hijriDate" placeholder="Enter Hijri Date (e.g., 01-01-1446)">
+        <button onclick="convertToGregorian()">Convert to Gregorian</button>
+        <p id="gregorianResult"></p>
+    </div>
+</div>
 
-            let surahSelect = document.getElementById("knownSurahs");
-            surahSelect.innerHTML = "";
-
-            filteredSurahs.forEach(surah => {
-                let option = document.createElement("option");
-                option.value = surah.surah;
-                option.text = surah.surah;
-                surahSelect.appendChild(option);
+<script>
+    // Prayer Times
+    function getPrayerTimes() {
+        let location = document.getElementById('location').value;
+        fetch(`https://api.aladhan.com/v1/timingsByCity?city=${location}&country=Egypt&method=2`)
+            .then(response => response.json())
+            .then(data => {
+                const prayerTimes = data.data.timings;
+                document.getElementById('timesList').innerHTML = `
+                    <li>Fajr: ${prayerTimes.Fajr}</li>
+                    <li>Dhuhr: ${prayerTimes.Dhuhr}</li>
+                    <li>Asr: ${prayerTimes.Asr}</li>
+                    <li>Maghrib: ${prayerTimes.Maghrib}</li>
+                    <li>Isha: ${prayerTimes.Isha}</li>
+                `;
+            })
+            .catch(err => {
+                alert("Could not fetch prayer times.");
             });
+    }
+
+    // Qibla Direction
+    function showQiblaDirection() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+
+                // Qibla Direction calculation (simplified example)
+                const qiblaAngle = calculateQibla(latitude, longitude);
+                document.getElementById('qiblaResult').innerHTML = `Qibla Direction: ${qiblaAngle}°`;
+            });
+        } else {
+            alert("Geolocation not supported.");
         }
+    }
 
-        // Proceed to next step and store the selected surahs
-        function nextStep() {
-            let surahSelect = document.getElementById("knownSurahs");
-            selectedSurahs = Array.from(surahSelect.selectedOptions).map(option => option.value);
+    function calculateQibla(lat, lon) {
+        const qiblaLatitude = 21.4225;
+        const qiblaLongitude = 39.8262;
+        const angle = Math.atan2(Math.sin(qiblaLongitude - lon) * Math.cos(qiblaLatitude), 
+                                 Math.cos(lat) * Math.sin(qiblaLatitude) - Math.sin(lat) * Math.cos(qiblaLatitude) * Math.cos(qiblaLongitude - lon));
+        return (angle * 180 / Math.PI + 360) % 360;
+    }
 
-            if (selectedSurahs.length > 0) {
-                document.getElementById("step1").style.display = "none";
-                document.getElementById("step2").style.display = "block";
-            } else {
-                alert("Please select at least one surah.");
-            }
-        }
+    // Dua and Azkar
+    function showDuaAzkar() {
+        document.getElementById('duaResult').innerHTML = `
+            <p>1. SubhanAllah (Glory be to Allah) x33</p>
+            <p>2. Alhamdulillah (Praise be to Allah) x33</p>
+            <p>3. Allahu Akbar (Allah is the Greatest) x34</p>
+        `;
+    }
 
-        // Calculate recitations based on selected surahs and target ayahs
-        function calculateRecitations() {
-            let targetAyahs = parseInt(document.getElementById("targetAyahs").value);
+    // Islamic Calendar
+    function getIslamicDate() {
+        const today = new Date();
+        const hijriDate = new Date(today.toLocaleDateString('en-US', { timeZone: 'Asia/Riyadh' }));
+        document.getElementById('islamicDate').innerHTML = `Islamic Date: ${hijriDate.toLocaleDateString()}`;
+    }
 
-            if (!targetAyahs || targetAyahs <= 0) {
-                alert("Please enter a valid number of target ayahs.");
-                return;
-            }
+    getIslamicDate(); // Initial call to get the date
 
-            let resultContainer = document.getElementById("result");
-            resultContainer.innerHTML = "";
-            let totalAyahs = 0;
-            let surahCounts = selectedSurahs.map(surah => {
-                let surahData = surahs.find(s => s.surah === surah);
-                totalAyahs += surahData.ayahs;
-                return {
-                    surah,
-                    ayahs: surahData.ayahs
-                };
-            });
-
-            let recitationPlan = [];
-
-            selectedSurahs.forEach(surah => {
-                let surahData = surahCounts.find(s => s.surah === surah);
-                let recitations = Math.ceil(targetAyahs / totalAyahs * surahData.ayahs);
-                recitationPlan.push(`${surah}: ${recitations} recitations`);
-            });
-
-            recitationPlan.forEach(plan => {
-                let listItem = document.createElement("li");
-                listItem.textContent = plan;
-                resultContainer.appendChild(listItem);
-            });
-        }
-    </script>
+    // Hijri to Gregorian Converter
+    function convertToGregorian() {
+        const hijriDate = document.getElementById('hijriDate').value;
+        // Example for demonstration, you'd ideally use a real API or algorithm to convert
+        document.getElementById('gregorianResult').innerHTML = `Gregorian Date: ${hijriDate}`; 
+    }
+</script>
 
 </body>
 </html>
