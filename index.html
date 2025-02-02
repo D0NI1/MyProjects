@@ -6,57 +6,90 @@
     <title>Namazi - Islamic Web App</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
+            font-family: 'Arial', sans-serif;
+            background-color: #f1f1f1;
             margin: 0;
             padding: 0;
             text-align: center;
         }
+
         header {
             background-color: #008080;
             color: white;
             padding: 20px;
-            font-size: 24px;
+            font-size: 30px;
+            letter-spacing: 2px;
         }
+
         .container {
-            margin: 20px;
+            padding: 20px;
         }
+
         input[type="text"] {
-            padding: 10px;
+            padding: 12px;
             margin: 10px 0;
             width: 60%;
+            max-width: 350px;
             border-radius: 5px;
             border: 1px solid #ccc;
+            font-size: 16px;
         }
+
         button {
-            padding: 10px 20px;
+            padding: 12px 20px;
             background-color: #008080;
             color: white;
             border: none;
             cursor: pointer;
             border-radius: 5px;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
         }
+
         button:hover {
             background-color: #006666;
         }
-        #prayerTimes, #qiblaDirection, #duaAzkar, #calendar, #hijriConverter {
-            margin-top: 20px;
-            padding: 20px;
+
+        .section {
             background-color: white;
-            border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
-        #prayerTimes ul {
+
+        .section h2 {
+            color: #008080;
+            font-size: 24px;
+        }
+
+        ul {
             list-style: none;
             padding: 0;
         }
-        #prayerTimes ul li {
-            padding: 5px;
+
+        ul li {
+            padding: 8px;
+            font-size: 18px;
+            color: #333;
         }
-        .result {
+
+        #prayerTimes ul li {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #qiblaResult, #duaResult, #gregorianResult {
             font-size: 18px;
             margin-top: 10px;
+            color: #555;
+        }
+
+        .result {
+            font-size: 20px;
+            font-weight: bold;
+            color: #008080;
         }
     </style>
 </head>
@@ -68,7 +101,7 @@
 
 <div class="container">
     <!-- Prayer Times Section -->
-    <div id="prayerTimes">
+    <div class="section" id="prayerTimes">
         <h2>Prayer Times</h2>
         <input type="text" id="location" placeholder="Enter city or coordinates (e.g., Cairo)">
         <button onclick="getPrayerTimes()">Get Prayer Times</button>
@@ -76,27 +109,27 @@
     </div>
 
     <!-- Qibla Direction Section -->
-    <div id="qiblaDirection">
+    <div class="section" id="qiblaDirection">
         <h2>Qibla Direction</h2>
         <button onclick="showQiblaDirection()">Find Qibla</button>
         <div id="qiblaResult"></div>
     </div>
 
     <!-- Dua and Azkar Section -->
-    <div id="duaAzkar">
+    <div class="section" id="duaAzkar">
         <h2>Dua and Azkar</h2>
         <button onclick="showDuaAzkar()">Show Daily Dua & Azkar</button>
         <div id="duaResult"></div>
     </div>
 
     <!-- Islamic Calendar Section -->
-    <div id="calendar">
+    <div class="section" id="calendar">
         <h2>Islamic Calendar</h2>
         <p id="islamicDate"></p>
     </div>
 
     <!-- Hijri to Gregorian Converter Section -->
-    <div id="hijriConverter">
+    <div class="section" id="hijriConverter">
         <h2>Hijri to Gregorian Converter</h2>
         <input type="text" id="hijriDate" placeholder="Enter Hijri Date (e.g., 01-01-1446)">
         <button onclick="convertToGregorian()">Convert to Gregorian</button>
@@ -105,23 +138,27 @@
 </div>
 
 <script>
-    // Prayer Times
+    // Prayer Times using the Aladhan API
     function getPrayerTimes() {
         let location = document.getElementById('location').value;
         fetch(`https://api.aladhan.com/v1/timingsByCity?city=${location}&country=Egypt&method=2`)
             .then(response => response.json())
             .then(data => {
-                const prayerTimes = data.data.timings;
-                document.getElementById('timesList').innerHTML = `
-                    <li>Fajr: ${prayerTimes.Fajr}</li>
-                    <li>Dhuhr: ${prayerTimes.Dhuhr}</li>
-                    <li>Asr: ${prayerTimes.Asr}</li>
-                    <li>Maghrib: ${prayerTimes.Maghrib}</li>
-                    <li>Isha: ${prayerTimes.Isha}</li>
-                `;
+                if (data.code === 200) {
+                    const prayerTimes = data.data.timings;
+                    document.getElementById('timesList').innerHTML = `
+                        <li><span>Fajr:</span> ${prayerTimes.Fajr}</li>
+                        <li><span>Dhuhr:</span> ${prayerTimes.Dhuhr}</li>
+                        <li><span>Asr:</span> ${prayerTimes.Asr}</li>
+                        <li><span>Maghrib:</span> ${prayerTimes.Maghrib}</li>
+                        <li><span>Isha:</span> ${prayerTimes.Isha}</li>
+                    `;
+                } else {
+                    alert('Error fetching prayer times. Please check the city name.');
+                }
             })
             .catch(err => {
-                alert("Could not fetch prayer times.");
+                alert("Could not fetch prayer times. Try again.");
             });
     }
 
@@ -132,7 +169,7 @@
                 const latitude = position.coords.latitude;
                 const longitude = position.coords.longitude;
 
-                // Qibla Direction calculation (simplified example)
+                // Calculate Qibla angle
                 const qiblaAngle = calculateQibla(latitude, longitude);
                 document.getElementById('qiblaResult').innerHTML = `Qibla Direction: ${qiblaAngle}°`;
             });
@@ -142,8 +179,8 @@
     }
 
     function calculateQibla(lat, lon) {
-        const qiblaLatitude = 21.4225;
-        const qiblaLongitude = 39.8262;
+        const qiblaLatitude = 21.4225;  // Kaaba's latitude
+        const qiblaLongitude = 39.8262; // Kaaba's longitude
         const angle = Math.atan2(Math.sin(qiblaLongitude - lon) * Math.cos(qiblaLatitude), 
                                  Math.cos(lat) * Math.sin(qiblaLatitude) - Math.sin(lat) * Math.cos(qiblaLatitude) * Math.cos(qiblaLongitude - lon));
         return (angle * 180 / Math.PI + 360) % 360;
@@ -158,7 +195,7 @@
         `;
     }
 
-    // Islamic Calendar
+    // Islamic Calendar - Displaying the current Islamic date
     function getIslamicDate() {
         const today = new Date();
         const hijriDate = new Date(today.toLocaleDateString('en-US', { timeZone: 'Asia/Riyadh' }));
