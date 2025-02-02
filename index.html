@@ -88,22 +88,29 @@
         <h1>Memorization Calculator</h1>
     </header>
 
-    <div class="container">
-        <h2>Enter Your Information</h2>
+    <div class="container" id="step1">
+        <h2>Step 1: Select Surahs You Know</h2>
+        <div class="form-group">
+            <label for="surahSearch">Search and Select Surahs</label>
+            <input type="text" id="surahSearch" placeholder="Search Surahs..." oninput="filterSurahs()" />
+        </div>
+
+        <div class="form-group">
+            <label for="knownSurahs">Select Surahs</label>
+            <select id="knownSurahs" multiple style="height: 200px; width: 100%;"></select>
+        </div>
+
+        <button onclick="nextStep()">Confirm Surahs</button>
+    </div>
+
+    <div class="container" id="step2" style="display: none;">
+        <h2>Step 2: Enter Target Number of Ayahs</h2>
         <div class="form-group">
             <label for="targetAyahs">Target Number of Ayahs</label>
-            <input type="number" id="targetAyahs" placeholder="Enter number of ayahs you want to memorize" />
+            <input type="number" id="targetAyahs" placeholder="Enter target ayahs" />
         </div>
 
-        <div class="form-group">
-            <label for="knownSurahs">Known Surahs</label>
-            <select id="knownSurahs" multiple>
-                <!-- Surahs will be dynamically added here -->
-            </select>
-        </div>
-
-        <button onclick="calculate()">Calculate</button>
-
+        <button onclick="calculateRecitations()">Calculate Recitations</button>
         <div class="result" id="result"></div>
     </div>
 
@@ -181,6 +188,15 @@
             { surah: "Al-Inshiqaq", ayahs: 25 },
             { surah: "Al-Buruj", ayahs: 22 },
             { surah: "At-Tariq", ayahs: 17 },
+            { surah: "Al-A'la", ayahs: 19 },
+            { surah: "Al-Ghashiyah", ayahs: 26 },
+            { surah: "Al-Fajr", ayahs: 30 },
+            { surah: "Al-Balad", ayahs: 20 },
+            { surah: "Ash-Shams", ayahs: 15 },
+            { surah: "Al-Lail", ayahs: 21 },
+            { surah: "Ad-Duha", ayahs: 11 },
+            { surah: "Al-Sharh", ayahs: 8 },
+            { surah: "At-Tin", ayahs: 8 },
             { surah: "Al-Alaq", ayahs: 19 },
             { surah: "Al-Qadr", ayahs: 5 },
             { surah: "Al-Bayyina", ayahs: 8 },
@@ -202,43 +218,73 @@
             { surah: "An-Nas", ayahs: 6 }
         ];
 
-        // Add surahs to the dropdown
-        const knownSurahsSelect = document.getElementById("knownSurahs");
-        surahs.forEach(surah => {
-            const option = document.createElement("option");
-            option.value = surah.surah;
-            option.textContent = surah.surah;
-            knownSurahsSelect.appendChild(option);
-        });
+        let selectedSurahs = [];
 
-        function calculate() {
-            const targetAyahs = parseInt(document.getElementById("targetAyahs").value);
-            const knownSurahs = Array.from(knownSurahsSelect.selectedOptions).map(option => option.value);
+        // Filter Surahs for the search bar
+        function filterSurahs() {
+            let searchTerm = document.getElementById("surahSearch").value.toLowerCase();
+            let filteredSurahs = surahs.filter(surah => surah.surah.toLowerCase().includes(searchTerm));
 
-            let totalKnownAyahs = 0;
-            knownSurahs.forEach(surah => {
-                const foundSurah = surahs.find(s => s.surah === surah);
-                totalKnownAyahs += foundSurah.ayahs;
+            let surahSelect = document.getElementById("knownSurahs");
+            surahSelect.innerHTML = "";
+
+            filteredSurahs.forEach(surah => {
+                let option = document.createElement("option");
+                option.value = surah.surah;
+                option.text = surah.surah;
+                surahSelect.appendChild(option);
             });
+        }
 
-            let remainingAyahs = targetAyahs - totalKnownAyahs;
-            let resultHtml = `<h3>Result</h3><p>You need to memorize ${remainingAyahs} more ayahs.</p>`;
+        // Proceed to next step and store the selected surahs
+        function nextStep() {
+            let surahSelect = document.getElementById("knownSurahs");
+            selectedSurahs = Array.from(surahSelect.selectedOptions).map(option => option.value);
 
-            if (remainingAyahs > 0) {
-                resultHtml += "<ul>";
-                surahs.forEach(surah => {
-                    if (!knownSurahs.includes(surah.surah)) {
-                        let reciteCount = Math.ceil(remainingAyahs / surahs.length);
-                        resultHtml += `<li>${surah.surah}: ${reciteCount} times</li>`;
-                    }
-                });
-                resultHtml += "</ul>";
+            if (selectedSurahs.length > 0) {
+                document.getElementById("step1").style.display = "none";
+                document.getElementById("step2").style.display = "block";
             } else {
-                resultHtml += "<p>You have already memorized enough ayahs!</p>";
+                alert("Please select at least one surah.");
+            }
+        }
+
+        // Calculate recitations based on selected surahs and target ayahs
+        function calculateRecitations() {
+            let targetAyahs = parseInt(document.getElementById("targetAyahs").value);
+
+            if (!targetAyahs || targetAyahs <= 0) {
+                alert("Please enter a valid number of target ayahs.");
+                return;
             }
 
-            document.getElementById("result").innerHTML = resultHtml;
+            let resultContainer = document.getElementById("result");
+            resultContainer.innerHTML = "";
+            let totalAyahs = 0;
+            let surahCounts = selectedSurahs.map(surah => {
+                let surahData = surahs.find(s => s.surah === surah);
+                totalAyahs += surahData.ayahs;
+                return {
+                    surah,
+                    ayahs: surahData.ayahs
+                };
+            });
+
+            let recitationPlan = [];
+
+            selectedSurahs.forEach(surah => {
+                let surahData = surahCounts.find(s => s.surah === surah);
+                let recitations = Math.ceil(targetAyahs / totalAyahs * surahData.ayahs);
+                recitationPlan.push(`${surah}: ${recitations} recitations`);
+            });
+
+            recitationPlan.forEach(plan => {
+                let listItem = document.createElement("li");
+                listItem.textContent = plan;
+                resultContainer.appendChild(listItem);
+            });
         }
     </script>
+
 </body>
 </html>
